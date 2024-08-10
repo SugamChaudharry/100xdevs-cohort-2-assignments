@@ -17,115 +17,170 @@
 */
 
 class Calculator {
-  constructor(result = 0){
-    this.result = result
+  constructor(result = 0) {
+    this.result = result;
   }
   // add: takes a number and adds it to the result
-  add(n){
-    return n+this.result
+  add(n) {
+    return n + this.result;
   }
   // subtract: takes a number and subtracts it from the result
-  subtract(n){
-    return n-this.result
+  subtract(n) {
+    return n - this.result;
   }
   // - multiply: takes a number and multiply it to the result
-  multiply(n){
-    return n*this.result
+  multiply(n) {
+    return n * this.result;
   }
   // - divide: takes a number and divide it to the result
-  divide(n){
-    return n/this.result
+  divide(n) {
+    return n / this.result;
   }
   // - clear: makes the `result` variable to 0
-  clear(){
-    this.result = 0
+  clear() {
+    this.result = 0;
   }
   // - getResult: returns the value of `result` variable
-  getResult(){
+  getResult() {
     console.log(this.result);
   }
   // - calculate: takes a string expression which can take multi-arithmetic operations and give its result
-  calculate(str = ''){
+  calculate(str = "") {
     // removing spaces
-    let newStr = ''
-    for(let i = 0 ; i < str.length; i++){
-      if (str[i] !== " "){
-        newStr += str[i]
+    let newStr = "";
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] !== " ") {
+        newStr += str[i];
       }
     }
     // creating array of values which might have suArray
-    str = newStr
-    newStr = []
-    function subArray(str,i,dividePoint,fn=null){
-      i++
-      let subArr = []
-      let k = 0
-      while(str[i] !== dividePoint[0]){
-        if (str[i] !== dividePoint[1]){
+    str = newStr;
+    newStr = [];
+    function subArray(str, i, fn) {
+      i++;
+      let subArr = [];
+      let k = 0;
+      while (str[i] !== ")") {
+        if (str[i] !== "(") {
           subArr[k] = str[i];
-          k++
-          i++
-        }else{
-          [subArr[k], i] = subArray(str,i);
-          k++
-          i++
+          k++;
+          i++;
+        } else {
+          [subArr[k], i] = subArray(str, i, fn);
+          k++;
+          i++;
         }
       }
-      const fnReturn = fn(subArr)
-      const returnValue = fnReturn === null ? subArr : fnReturn
-      return [returnValue,i]
+      const returnValue = fn(subArr);
+      return [returnValue, i];
     }
-    for(let i = 0, j = 0; i < str.length; i++){
-      if (str[i] !== '('){
+    //[2,*,3,+,5] ==> [[2,*,3],[3,+,5]]
+    function simplifying(arr) {
+      const res = [];
+      let check = [0, 0];
+      let subArr = [];
+      for (let i = 0, j = 0; i < arr.length; i++) {
+        if (Number(arr[i]) || Number(arr[i]) === 0) {
+          if (check[0] === 0) {
+            subArr[j] = Number(arr[i]);
+          } else {
+            subArr[j] = subArr[j] * 10 + Number(arr[i]);
+          }
+          check[0]++;
+        } else {
+          if (check[1] === 0) {
+            j++;
+            subArr[j] = arr[i];
+            check[1]++;
+            check[0] = 0;
+            j++;
+          } else {
+            res.push(subArr);
+            subArr = [res[res.length - 1][2]];
+            j = 1;
+            subArr[j] = arr[i];
+            j++;
+            check[1] = 1;
+            check[0] = 0;
+          }
+        }
+      }
+      res.push(subArr);
+
+      return calc(res);
+    }
+    function calc(arr) {
+      function doCalculation(arr) {
+        let res = 0;
+        if (arr[1] === "+") {
+          res = Number(arr[0]) + Number(arr[2]);
+        } else if (arr[1] === "-") {
+          res = Number(arr[0]) - Number(arr[2]);
+        } else if (arr[1] === "*") {
+          res = Number(arr[0]) * Number(arr[2]);
+        } else if (arr[1] === "/") {
+          res = Number(arr[0]) / Number(arr[2]);
+        }
+        return res;
+      }
+
+      if (arr.length === 1) {
+        return doCalculation(arr[0]);
+      } else if (arr.length === 2) {
+        switch (arr[0][1]) {
+          case "+":
+          case "-":
+            arr[0][2] = doCalculation(arr[1])
+            return doCalculation(arr[0])
+          case "*":
+          case "/":
+            arr[1][0] = doCalculation(arr[0])
+            return doCalculation(arr[1])
+        }
+      } else {
+        let i = 1;
+        for (; i < arr.length - 1; i++) {
+          switch (arr[i - 1][1]) {
+            case "+":
+            case "-":
+              switch (arr[i][1]) {
+                case "+":
+                case "-":
+                  arr[i][0] = doCalculation(arr[i - 1]);
+                  break;
+                  case "*":
+                  case "/":
+                  arr[i+1][0] = arr[i - 1][2] = doCalculation(arr[i]);
+                  arr[i] = arr[i - 1];
+                  break;
+              }
+              break;
+            case "*":
+            case "/":
+              arr[i][0] = doCalculation(arr[i - 1]);
+              break;
+          }
+        }
+        return calc([arr[arr.length-2],arr[arr.length-1]])
+      }
+    }
+    for (let i = 0, j = 0; i < str.length; i++) {
+      if (str[i] !== "(") {
         newStr[j] = str[i];
-        j++
-      }else{
-        [newStr[j],i,['(',')']] = subArray(str,i)
+        j++;
+      } else {
+        [newStr[j], i] = subArray(str, i, simplifying);
         j++;
       }
     }
-    function simplifying(arr){//[2,*,3,+,5] ==> [[2,*,3],[3,+,5]]
-      const res = [];
-      let check = [0,0];
-      let subArr = []
-      for (let i = 0, j=0; i < arr.length; i++) {
-        if (Number(arr[i])){
-          if (check[0] === 0){
-            subArr[j] = arr[i];
-          }else{
-            subArr[j] = subArr[j] * 10 + arr[i];
-          }
-          check[0]++
-        }else{
-          if (check[1] === 0){
-            j++;
-            subArr[j] = arr[i];
-            check[1]++
-            check[0] = 0
-            j++;
-          }else{
-            res.push(subArr);
-            subArr = [res[res.length -1][2]]
-            j = 1
-            subArr[j] = arr[i]
-            j++
-            check[1] = 0
-            check[0] = 0
-          }
-        }
-    }
-        res.push(subArr);
-      return res
-    }
-    function calc(strArr) {
-
-    }
-    const res = subArray(newStr,0,['[',']'],calc)
-
+    return simplifying(newStr);
   }
 }
-const clc = new Calculator()
-console.log(clc.calculate(`10 +   2 *    (   6 - (4 + 1) / 2) + 7`));
-// [10, +, 2, [6, -, [4,+,1],/,2],+,7]
+const clc = new Calculator();
+console.log(
+  clc.calculate(
+   '(2.5 + 1.5) * 3'
+  )
+);
 
 module.exports = Calculator;
