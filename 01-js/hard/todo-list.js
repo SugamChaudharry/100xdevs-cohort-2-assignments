@@ -11,7 +11,35 @@
 */
 
 class Todo {
-
+  constructor(){
+    this.todos = []
+  }
+  // - add(todo): adds todo to list of todos
+  add(data){
+    this.todos.push(data)
+  }
+  // - remove(indexOfTodo): remove todo from list of todos
+  remove(index){
+    this.todos = this.todos.filter((t,i) => {
+      if (i !== index) return t
+    })
+  }
+  // - update(index, updatedTodo): update todo at given index
+  update(index, updatedTodo){
+    this.todos[index] = updatedTodo
+  }
+  // - getAll: returns all todos
+  getAll(){
+    return this.todos
+  }
+  // - get(indexOfTodo): returns todo at given index
+  get(indexOfTodo){
+    return this.todos[indexOfTodo]
+  }
+  // - clear: deletes all todos
+  clear(){
+    this.todos = []
+  }
 }
 
 module.exports = Todo;

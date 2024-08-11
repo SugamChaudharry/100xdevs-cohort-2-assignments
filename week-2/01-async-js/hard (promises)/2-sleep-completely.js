@@ -5,6 +5,18 @@
  */
 
 function sleep(milliseconds) {
+  const time1 = new Date().getTime();
+  let time2;
+  const promise = new Promise((res,rej) => {
+  while (true) {
+      time2 = new Date().getTime();
+      if (time2 - time1 === milliseconds) {
+        res()
+        break;
+      }
+    }
+  });
+  return promise;
 }
 
 module.exports = sleep;
