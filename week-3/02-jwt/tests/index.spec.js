@@ -10,7 +10,7 @@ describe('signJwt', () => {
 	test('signs a jwt correctly', () => {
 		const token = signJwt('kirat@gmail.com', '123456' );
 		const decoded = jwt.decode(token);
-		expect(decoded.username).toBe('kirat@gmail.com');
+		expect(decoded.email).toBe('kirat@gmail.com');
 	});
 
 	test('returns null if invalid email', () => {
@@ -27,13 +27,13 @@ describe('signJwt', () => {
 
 describe('decodeJwt', () => {
 	test('decodes a jwt with diff password correctly', () => {
-		const token = jwt.sign({ username: 'kirat@gmail.com', password: '123456' }, "randomPassword");
+		const token = jwt.sign({ email: 'kirat@gmail.com', password: '123456' }, "randomPassword");
 		const decoded = decodeJwt(token);
 		expect(decoded).toBe(true);
 	});
 
 	test('decodes a jwt with same password correctly', () => {
-		const token = jwt.sign({ username: 'kirat@gmail.com', password: '123456' }, jwtPassword);
+		const token = jwt.sign({ email: 'kirat@gmail.com', password: '123456' }, jwtPassword);
 		const decoded = decodeJwt(token);
 		expect(decoded).toBe(true);
 	});
@@ -47,13 +47,13 @@ describe('decodeJwt', () => {
 
 describe('verifyJwt', () => {
 	test('cant decode a jwt with diff password correctly', () => {
-		const token = jwt.sign({ username: 'kirat@gmail.com', password: '123456' }, "randomPassword");
+		const token = jwt.sign({ email: 'kirat@gmail.com', password: '123456' }, "randomPassword");
 		const decoded = verifyJwt(token);
 		expect(decoded).toBe(false);
 	});
 
 	test('decodes a jwt with same password correctly', () => {
-		const token = jwt.sign({ username: 'kirat@gmail.com', password: '123456' }, jwtPassword);
+		const token = jwt.sign({ email: 'kirat@gmail.com', password: '123456' }, jwtPassword);
 		const decoded = verifyJwt(token);
 		expect(decoded).toBe(true);
 	});
