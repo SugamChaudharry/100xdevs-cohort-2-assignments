@@ -10,26 +10,26 @@
     Description: Returns a list of all todo items.
     Response: 200 OK with an array of todo items in JSON format.
     Example: GET http://localhost:3000/todos
-    
+
   2.GET /todos/:id - Retrieve a specific todo item by ID
     Description: Returns a specific todo item identified by its ID.
     Response: 200 OK with the todo item in JSON format if found, or 404 Not Found if not found.
     Example: GET http://localhost:3000/todos/123
-    
+
   3. POST /todos - Create a new todo item
     Description: Creates a new todo item.
     Request Body: JSON object representing the todo item.
     Response: 201 Created with the ID of the created todo item in JSON format. eg: {id: 1}
     Example: POST http://localhost:3000/todos
     Request Body: { "title": "Buy groceries", "completed": false, description: "I should buy groceries" }
-    
+
   4. PUT /todos/:id - Update an existing todo item by ID
     Description: Updates an existing todo item identified by its ID.
     Request Body: JSON object representing the updated todo item.
     Response: 200 OK if the todo item was found and updated, or 404 Not Found if not found.
     Example: PUT http://localhost:3000/todos/123
     Request Body: { "title": "Buy groceries", "completed": true }
-    
+
   5. DELETE /todos/:id - Delete a todo item by ID
     Description: Deletes a todo item identified by its ID.
     Response: 200 OK if the todo item was found and deleted, or 404 Not Found if not found.
@@ -41,9 +41,124 @@
  */
   const express = require('express');
   const bodyParser = require('body-parser');
-  
+
   const app = express();
-  
   app.use(bodyParser.json());
+
+  app.get('/todos', (req, res) => {
+    try {
+      const fs = require('fs');
+      const data = fs.readFileSync('./todos.json',
+        { encoding: 'utf8', flag: 'r' });
+      return res.status(200).json(data)
+    } catch (error) {
+      console.log(error.massage);
+    }
+  });
+  app.get('/todos/:id', (req, res) => {
+    try {
+      const fs = require('fs');
+      const id = req.params.id;
+
+      // Read data from the JSON file
+      const data = fs.readFileSync('./todos.json', 'utf8');
+      const todos = JSON.parse(data);
+
+      // Find the todo item by id
+      const todo = todos.find(item => item.id == id);
+
+      if (todo) {
+        return res.status(200).json(todo);
+      } else {
+        return res.status(404).json({ error: 'Todo not found' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Server error' });
+    }
+  });
+  app.post('/todos', (req, res) => {
+    try {
+      const fs = require('fs');
+      const { title, completed, description } = req.body;
+
+      // Validate request body
+      if (!title || completed === undefined || !description) {
+        return res.status(400).json({ error: "All parameters are required" });
+      }
+
+      // Read and parse the existing todos from the file
+      const data = fs.readFileSync('./todos.json', 'utf8');
+      const todos = JSON.parse(data);
+
+      // Create a new todo item
+      const newTodo = {
+        id: todos.length + 1, // Incremental ID
+        title,
+        completed,
+        description,
+      };
+
+      // Add the new todo item to the array
+      todos.push(newTodo);
+
+      // Write the updated array back to the file
+      fs.writeFileSync('./todos.json', JSON.stringify(todos, null, 2));
+
+      // Return the ID of the created todo item
+      return res.status(201).json({ id: newTodo.id });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Server error' });
+    }
+  });
+  app.put('/todos/:id', (req, res) => {
+    const id = req.params.id
+    const {title,completed,description} = req.body;
+    if (!title || completed === undefined || !description) {
+      return res.status(400).json({ error: "All parameters are required" });
+    }
+    try {
+      const fs = require('fs');
+      let data = JSON.parse(fs.readFileSync("./todos.json", 'utf8'))
+      for(let i = 0; i < data.length; i++){
+        if (data[i].id === Number(id)) {
+          data[i] = {
+            id: data[i].id,
+            title: title,
+            completed: completed,
+            description: description,
+          }
+        }
+      }
+      fs.writeFileSync('./todos.json', JSON.stringify(data, null, 2));
+      return res.status(200).json(data)
+    } catch (error) {
+      res.status(500).json(error)
+    }
+  });
+  app.delete('/todos/:id', (req,res) => {
+    const id  = req.params.id
+    try {
+      const fs = require('fs');
+      const data = JSON.parse(fs.readFileSync("./todos.json", "utf-8"))
+      let f = 1
+      const newData = data.filter((todo) => {
+        if(todo.id !== Number(id)){
+          todo.id = f++
+          return true
+        }else{
+          return false
+        }
+      })
+      fs.writeFileSync('./todos.json', JSON.stringify(newData, null, 2));
+      return res.status(200).json(newData)
+    } catch (error) {
+      res.status(500).json(error)
+    }
+  })
   
+  app.listen(3001, () => {
+    console.log(`Server started on port`, 3001  );
+  });
   module.exports = app;
