@@ -41,13 +41,13 @@
  */
   const express = require('express');
   const bodyParser = require('body-parser');
+  const fs = require('fs');
 
   const app = express();
   app.use(bodyParser.json());
 
   app.get('/todos', (req, res) => {
     try {
-      const fs = require('fs');
       const data = fs.readFileSync('./todos.json',
         { encoding: 'utf8', flag: 'r' });
       return res.status(200).json(data)
@@ -57,7 +57,6 @@
   });
   app.get('/todos/:id', (req, res) => {
     try {
-      const fs = require('fs');
       const id = req.params.id;
 
       // Read data from the JSON file
@@ -79,7 +78,6 @@
   });
   app.post('/todos', (req, res) => {
     try {
-      const fs = require('fs');
       const { title, completed, description } = req.body;
 
       // Validate request body
@@ -119,7 +117,6 @@
       return res.status(400).json({ error: "All parameters are required" });
     }
     try {
-      const fs = require('fs');
       let data = JSON.parse(fs.readFileSync("./todos.json", 'utf8'))
       for(let i = 0; i < data.length; i++){
         if (data[i].id === Number(id)) {
@@ -140,7 +137,6 @@
   app.delete('/todos/:id', (req,res) => {
     const id  = req.params.id
     try {
-      const fs = require('fs');
       const data = JSON.parse(fs.readFileSync("./todos.json", "utf-8"))
       let f = 1
       const newData = data.filter((todo) => {
@@ -157,7 +153,7 @@
       res.status(500).json(error)
     }
   })
-  
+
   app.listen(3001, () => {
     console.log(`Server started on port`, 3001  );
   });

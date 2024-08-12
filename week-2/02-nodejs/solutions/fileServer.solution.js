@@ -22,7 +22,7 @@ app.get('/files', function (req, res) {
     if (err) {
         return res.status(500).json({ error: 'Failed to retrieve files' });
     }
-    res.json(files);
+    res.status(200).json(files);
     });
 });
 
