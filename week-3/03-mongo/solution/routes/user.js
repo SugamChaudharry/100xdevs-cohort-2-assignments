@@ -10,7 +10,7 @@ router.post('/signup', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     User.create({
-        username, 
+        username,
         password
     })
     res.json({
