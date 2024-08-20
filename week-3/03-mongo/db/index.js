@@ -2,7 +2,7 @@ const { type } = require('express/lib/response');
 const mongoose = require('mongoose');
 
 // Connect to MongoDB
-mongoose.connect(`mongodb+srv://sugam:bobbyji123@cluster0.gmbl6b3.mongodb.net/test`);
+mongoose.connect(``);
 
 // Define schemas
 const AdminSchema = new mongoose.Schema({
